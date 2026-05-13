@@ -1,0 +1,5 @@
+playwright>=1.40.0
+httpx>=0.25.0
+pydantic>=2.0
+python-dotenv
+beautifulsoup4
