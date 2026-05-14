@@ -1,72 +1,108 @@
-# Multi-Platform-Content-Publisher
+<div align="center">
 
-![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)
+# ✍️ Multi-Platform Content Publisher
 
-> **Showcase** — ~15% skeleton. Core implementation not included.
+[![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat-square&logo=python&logoColor=white)](https://python.org)
+[![Claude](https://img.shields.io/badge/Claude-CLI-D4A843?style=flat-square&logo=anthropic&logoColor=white)](https://claude.ai)
+[![Playwright](https://img.shields.io/badge/Playwright-Automation-2EAD33?style=flat-square&logo=playwright&logoColor=white)](https://playwright.dev)
+[![Lark](https://img.shields.io/badge/Lark-Bot-00D6B9?style=flat-square&logo=bytedance&logoColor=white)](https://open.feishu.cn)
 
-Automated daily publishing pipeline. Fetches trending topics, generates platform-specific copy via Claude, publishes to 9 platforms, and auto-replies to comments. A Lark bot reports results in real time.
+**End-to-end AI content automation: hotspot harvesting → daily article generation → 9-platform publishing → comment reply, no human-in-the-loop**
 
-## Stack
+> ⚠️ **Showcase Only** — ~15% skeleton. Platform credentials, anti-bot logic & production schedulers not included.
 
-- Python
-- Claude Code CLI
-- Playwright (browser automation)
-- Lark (Feishu) Bot API
+</div>
 
-## Platforms
+---
 
-Juejin, Zhihu, CSDN, Sohu, Toutiao, Cnblogs, Sspai, Twitter, WeChat (read-only notify)
+## ✨ Overview
 
-## Pipeline
+A fully autonomous content pipeline that publishes AI-tech articles to **9 platforms every day** — sourcing fresh hotspots, generating platform-specific copy with Claude CLI, then publishing via either browser automation (Playwright) or direct HTTP APIs. A Lark bot ("Murphy") notifies the team for every publish and reply.
 
-```
-Trending topic fetch
-    └── Claude CLI: generate per-platform copy
-         └── Playwright / HTTP API: publish
-              └── Lark bot: send result card
-                   └── Comment monitor: auto-reply
-```
+---
 
-The scheduler runs once per day. Each platform adapter handles login state via saved Playwright storage.
-
-## Usage
-
-```bash
-pip install -r requirements.txt
-cp config.example.yaml config.yaml   # fill in API keys and account credentials
-
-# Dry run (generate copy, skip publish)
-python run.py --dry-run
-
-# Full run
-python run.py
-
-# Publish to a single platform
-python run.py --platform juejin
-```
-
-## Structure
+## 🏗️ Architecture
 
 ```
-Multi-Platform-Content-Publisher/
-├── adapters/          # one file per platform
-│   ├── juejin.py
-│   ├── zhihu.py
-│   └── ...
-├── generator/         # Claude CLI wrapper and prompt templates
-├── notifier/          # Lark bot integration
-├── scheduler/         # cron entry point
-├── run.py
-└── config.example.yaml
+┌────────────────────────────────────────────────────────┐
+│   Daily Schedule (cron)                                │
+└─────────┬──────────────────────────────────────────────┘
+          │ 09:00
+          ▼
+ ┌────────────────────┐       ┌───────────────────────┐
+ │  Intel Harvester   │──────►│  data/intel/*.json    │
+ │  HN · GH Trending  │       │   (cached hotspots)    │
+ │  V2EX              │       └───────────┬───────────┘
+ └────────────────────┘                   │
+                                          │
+                                          ▼
+                              ┌───────────────────────┐
+                              │  Claude CLI Writer    │
+                              │  (per-platform style) │
+                              └───────────┬───────────┘
+                                          │
+            ┌──────────────────┬──────────┴──────────┬──────────────┐
+            ▼                  ▼                     ▼              ▼
+       Juejin            Zhihu             CSDN / 头条 / ...    Twitter
+      (Playwright)     (Playwright)            (Playwright)       (API)
+            │                  │                     │              │
+            └──────────────────┴─────────┬───────────┴──────────────┘
+                                         │
+                                         ▼
+                              ┌───────────────────────┐
+                              │  Lark Bot · Murphy    │
+                              │  green card + link    │
+                              └───────────────────────┘
 ```
 
-## Configuration
+---
 
-`config.yaml` fields:
+## 🌍 Supported Platforms
 
-| Key | Description |
-|-----|-------------|
-| `claude.model` | Claude model to use |
-| `platforms.<name>.enabled` | toggle per platform |
-| `lark.webhook` | Lark bot webhook URL |
-| `schedule.cron` | cron expression for daily run |
+| Platform | Method | Daily Slot |
+|---|---|---|
+| 掘金 Juejin | Playwright | 10:00 |
+| 知乎 Zhihu | Playwright | 11:00 |
+| CSDN | Playwright | 12:00 |
+| 搜狐 Sohu | Playwright | 13:00 |
+| 头条 Toutiao | Playwright | 14:00 |
+| 博客园 Cnblogs | Playwright | 15:00 |
+| 少数派 Sspai | Playwright | 16:00 |
+| Twitter | HTTP API | rolling |
+| Intel digest | Lark | 09:00 |
+
+---
+
+## 📁 Structure
+
+```
+multi-platform-content-publisher/
+├── src/
+│   ├── publishers/
+│   │   ├── base.py            # BasePublisher interface
+│   │   └── zhihu.py           # Zhihu publisher (example)
+│   ├── intel/
+│   │   └── hotspot_fetcher.py # HN / GH Trending fetcher
+│   └── lark/
+│       └── murphy_bot.py      # Murphy notification bot
+├── prompts/                    # Per-platform style prompts
+└── requirements.txt
+```
+
+---
+
+## 🔧 Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Content Generation | Claude CLI (no API key needed) |
+| Browser Automation | Playwright (Chromium) |
+| Hotspot Sources | Hacker News · GitHub Trending · V2EX |
+| Notification | Lark / Feishu Bot |
+| Scheduler | systemd timer / cron |
+
+---
+
+<div align="center">
+<sub>Showcase version · Anti-bot & credential logic not included · For portfolio reference only</sub>
+</div>
